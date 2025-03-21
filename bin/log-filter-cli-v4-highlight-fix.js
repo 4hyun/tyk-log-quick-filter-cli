@@ -78,30 +78,34 @@ function highlightWord(log, index) {
 
 // Function to extract and format time range from sorted logs
 function getTimeRange(logs) {
-    if (logs.length === 0) return "No results";
+  if (logs.length === 0) return "No results"
 
-    // Extract datetime (always in "MMM DD HH:MM:SS" format at start of each log)
-    const firstLogTime = logs[0].log.match(/^[A-Za-z]{3} \d{2} \d{2}:\d{2}:\d{2}/)?.[0];
-    const lastLogTime = logs[logs.length - 1].log.match(/^[A-Za-z]{3} \d{2} \d{2}:\d{2}:\d{2}/)?.[0];
+  // Extract datetime (always in "MMM DD HH:MM:SS" format at start of each log)
+  const firstLogTime = logs[0].log.match(
+    /^[A-Za-z]{3} \d{2} \d{2}:\d{2}:\d{2}/
+  )?.[0]
+  const lastLogTime = logs[logs.length - 1].log.match(
+    /^[A-Za-z]{3} \d{2} \d{2}:\d{2}:\d{2}/
+  )?.[0]
 
-    if (!firstLogTime || !lastLogTime) return "Time range unavailable";
+  if (!firstLogTime || !lastLogTime) return "Time range unavailable"
 
-    // Convert times to Date objects (using a dummy year for consistency)
-    const parseTime = (timeStr) => {
-        const now = new Date();
-        return new Date(`${now.getFullYear()} ${timeStr}`);
-    };
+  // Convert times to Date objects (using a dummy year for consistency)
+  const parseTime = (timeStr) => {
+    const now = new Date()
+    return new Date(`${now.getFullYear()} ${timeStr}`)
+  }
 
-    const startTime = parseTime(firstLogTime);
-    const endTime = parseTime(lastLogTime);
-    
-    // Calculate time difference
-    const diffMs = Math.abs(endTime - startTime);
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMinutes = Math.floor((diffMs / (1000 * 60)) % 60);
-    const diffSeconds = Math.floor((diffMs / 1000) % 60);
+  const startTime = parseTime(firstLogTime)
+  const endTime = parseTime(lastLogTime)
 
-    return `${firstLogTime} to ${lastLogTime} (${diffHours}h ${diffMinutes}m ${diffSeconds}s)`;
+  // Calculate time difference
+  const diffMs = Math.abs(endTime - startTime)
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+  const diffMinutes = Math.floor((diffMs / (1000 * 60)) % 60)
+  const diffSeconds = Math.floor((diffMs / 1000) % 60)
+
+  return `${firstLogTime} to ${lastLogTime} (${diffHours}h ${diffMinutes}m ${diffSeconds}s)`
 }
 
 // Function to prompt user for input
@@ -144,8 +148,8 @@ function promptUser() {
       // Print row count summary
       console.log(`\n📊 Rows: ${filteredLogs.length}`)
 
-// Print time range summary
-            console.log(`🕒 Time Range: ${getTimeRange(filteredLogs)}`);
+      // Print time range summary
+      console.log(`🕒 Time Range: ${getTimeRange(filteredLogs)}`)
     } catch (error) {
       console.error("\n⚠️ Invalid input. Try again.")
     }

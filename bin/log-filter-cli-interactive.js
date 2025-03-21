@@ -10,8 +10,10 @@ import { fileURLToPath } from "url"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+console.debug("[debug] __dirname : ", __dirname)
+
 // Configuration file path
-const configFilePath = path.join(__dirname, "config.json")
+const configFilePath = path.join(process.cwd(), "log-filter-cli.config.json")
 
 // Load configuration or set default
 let config = { inputFilePath: "../src/gateway-logs.json" }
@@ -30,6 +32,7 @@ const saveConfig = () => {
 
 // Function to process logs
 const processLogs = (inputFilePath, filterWords = [], highlightIndex = 3) => {
+  console.debug("[DEBUG] processLogs inputFilePath: ", inputFilePath)
   if (!fs.existsSync(inputFilePath)) {
     console.error(`Error: Log file '${inputFilePath}' not found.`)
     return
@@ -43,6 +46,13 @@ const processLogs = (inputFilePath, filterWords = [], highlightIndex = 3) => {
     return
   }
 
+  if (logsData.filter((log) => log.raw_log).length < 1) {
+    console.error(
+      "Invalid version. starting with '-interactive' version, log.json file must contain raw_log field."
+    )
+    return
+  }
+
   // Generate regex pattern dynamically
   const regexPattern = filterWords.length
     ? `^.*${filterWords.map((word) => `\\b${word}\\b`).join(".*")}.*`
@@ -50,12 +60,12 @@ const processLogs = (inputFilePath, filterWords = [], highlightIndex = 3) => {
   const regex = new RegExp(regexPattern, "i")
 
   // Filter logs
-  const filteredLogs = logsData.filter((entry) => regex.test(entry.log))
+  const filteredLogs = logsData.filter((entry) => regex.test(entry.raw_log))
 
   if (filteredLogs.length > 0) {
     console.log("\n🎯 Matching Logs:\n")
     filteredLogs.forEach((entry) =>
-      console.log(highlightWord(entry.log, highlightIndex))
+      console.log(highlightWord(entry.raw_log, highlightIndex))
     )
   } else {
     console.log("\n❌ No logs matched your filter.")
@@ -73,12 +83,13 @@ const highlightWord = (log, index) => {
   return words.join(" ")
 }
 
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+})
+
 // Interactive mode
 const promptUser = () => {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  })
   rl.question("\nInput filter (or 'exit' to quit): ", (inputText) => {
     if (inputText.toLowerCase() === "exit") {
       console.log("👋 Exiting Log Filter CLI.")
